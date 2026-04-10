@@ -2,7 +2,7 @@ import os
 import shutil
 
 # 1. SETUP SOURCE
-default_source = r"D:\Flutter\Flutter Apps"
+default_source = r"C:\Flutter\Flutter Apps"
 SOURCE = input(f"Enter source folder (default: {default_source}): ").strip() or default_source
 
 if not os.path.exists(SOURCE):
