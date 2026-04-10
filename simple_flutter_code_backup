@@ -1,0 +1,77 @@
+import os
+import shutil
+
+# Ask user for SOURCE
+default_source = r"C:\Flutter\Flutter Apps"
+SOURCE = input(f"Enter source folder (default: {default_source}): ").strip()
+
+if not SOURCE:
+    SOURCE = default_source
+
+if not os.path.exists(SOURCE):
+    print("❌ Source folder does not exist!")
+    exit()
+
+# Ask user for DESTINATION
+DEST = input("Enter backup destination folder: ").strip()
+
+if not DEST:
+    print("❌ Destination is required!")
+    exit()
+
+os.makedirs(DEST, exist_ok=True)
+
+# Folders to exclude
+EXCLUDE_DIRS = {
+    "build",
+    ".dart_tool",
+    ".gradle",
+    ".idea",
+    "Pods",
+    "ephemeral",
+    ".plugin_symlinks"
+}
+
+def should_exclude(path):
+    parts = path.split(os.sep)
+    return any(part in EXCLUDE_DIRS for part in parts)
+
+print("\n🚀 Starting backup...\n")
+
+for app in os.listdir(SOURCE):
+    app_path = os.path.join(SOURCE, app)
+    dest_path = os.path.join(DEST, app)
+
+    if os.path.isdir(app_path):
+        print(f"📦 Backing up: {app}")
+
+        for root, dirs, files in os.walk(app_path):
+            # Skip unwanted folders
+            if should_exclude(root):
+                continue
+
+            # Remove excluded dirs from traversal (IMPORTANT)
+            dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
+
+            relative_path = os.path.relpath(root, app_path)
+            target_dir = os.path.join(dest_path, relative_path)
+
+            os.makedirs(target_dir, exist_ok=True)
+
+            for file in files:
+                src_file = os.path.join(root, file)
+                dst_file = os.path.join(target_dir, file)
+
+                try:
+                    # Skip symlinks
+                    if os.path.islink(src_file):
+                        continue
+
+                    shutil.copy2(src_file, dst_file)
+
+                except PermissionError:
+                    print(f"⚠️ Skipped (permission): {src_file}")
+                except Exception as e:
+                    print(f"⚠️ Error copying {src_file}: {e}")
+
+print("\n✅ Backup completed successfully!")
