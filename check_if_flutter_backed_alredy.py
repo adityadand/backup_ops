@@ -2,7 +2,7 @@ import os
 import shutil
 
 # Ask user for SOURCE
-default_source = r"D:\Flutter\Flutter Apps"
+default_source = r"C:\Flutter\Flutter Apps"
 SOURCE = input(f"Enter source folder (default: {default_source}): ").strip()
 
 if not SOURCE:
